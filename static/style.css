@@ -176,3 +176,41 @@
     display: none !important;
   }
 }
+
+/* Register Select Page Styles */
+.register-card .card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.register-card .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.register-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.bg-primary-soft {
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.bg-warning-soft {
+  background: rgba(255, 193, 7, 0.15);
+}
+
+.text-primary {
+  color: #667eea !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}

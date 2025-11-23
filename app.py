@@ -100,53 +100,99 @@ def roles_required(*roles):
         return wrapped
     return wrapper
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register')
 def register():
+    # Redirect to register select page
+    return redirect(url_for('register_select'))
+
+@app.route('/register/select')
+def register_select():
+    return render_template('register_select.html')
+
+@app.route('/register/parent', methods=['GET','POST'])
+def register_parent():
     if request.method == 'POST':
         name = request.form['name'].strip()
         email = request.form['email'].strip().lower()
         password = request.form['password']
-        role = request.form['role']
-        admin_passkey = request.form.get('admin_passkey', '').strip()
+        confirm_password = request.form['confirm_password']
 
-        if not all([name,email,password,role]):
+        if not all([name, email, password, confirm_password]):
             flash("Please fill all fields", "warning")
-            return redirect(url_for('register'))
-        if role not in {"parent", "admin"}:
-            flash("Invalid role selected.", "warning")
-            return redirect(url_for('register'))
+            return redirect(url_for('register_parent'))
 
         if not EMAIL_REGEX.match(email):
             flash("Please enter a valid email address.", "warning")
-            return redirect(url_for('register'))
-        
+            return redirect(url_for('register_parent'))
+
         if not is_strong_password(password):
             flash("Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one symbol.", "warning")
-            return redirect(url_for('register'))
+            return redirect(url_for('register_parent'))
 
-        if role == "admin":
-            if not admin_passkey:
-                flash("Admin passkey is required for admin registrations.", "warning")
-                return redirect(url_for('register'))
-            if admin_passkey != ADMIN_PASSKEY:
-                flash("Invalid admin passkey.", "danger")
-                return redirect(url_for('register'))
-        
+        if password != confirm_password:
+            flash("Passwords do not match.", "warning")
+            return redirect(url_for('register_parent'))
+
         hashed = bcrypt.generate_password_hash(password).decode('utf-8')
         conn = get_db_conn()
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT INTO users (name, email, password, role) VALUES (%s,%s,%s,%s)",
-                           (name, email, hashed, role))
+                           (name, email, hashed, 'parent'))
             conn.commit()
             flash("Registration successful. Please log in.", "success")
             return redirect(url_for('login'))
         except mysql.connector.errors.IntegrityError:
             flash("Email already registered.", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for('register_parent'))
         finally:
             cursor.close(); conn.close()
-    return render_template('register.html')
+    return render_template('register_parent.html')
+
+@app.route('/register/admin', methods=['GET','POST'])
+def register_admin():
+    if request.method == 'POST':
+        name = request.form['name'].strip()
+        email = request.form['email'].strip().lower()
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        admin_passkey = request.form.get('admin_passkey', '').strip()
+
+        if not all([name, email, password, confirm_password, admin_passkey]):
+            flash("Please fill all fields", "warning")
+            return redirect(url_for('register_admin'))
+
+        if not EMAIL_REGEX.match(email):
+            flash("Please enter a valid email address.", "warning")
+            return redirect(url_for('register_admin'))
+
+        if not is_strong_password(password):
+            flash("Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one symbol.", "warning")
+            return redirect(url_for('register_admin'))
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "warning")
+            return redirect(url_for('register_admin'))
+
+        if admin_passkey != ADMIN_PASSKEY:
+            flash("Invalid admin passkey.", "danger")
+            return redirect(url_for('register_admin'))
+
+        hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("INSERT INTO users (name, email, password, role) VALUES (%s,%s,%s,%s)",
+                           (name, email, hashed, 'admin'))
+            conn.commit()
+            flash("Registration successful. Please log in.", "success")
+            return redirect(url_for('login'))
+        except mysql.connector.errors.IntegrityError:
+            flash("Email already registered.", "danger")
+            return redirect(url_for('register_admin'))
+        finally:
+            cursor.close(); conn.close()
+    return render_template('register_admin.html')
 
 @app.route('/login', methods=['GET','POST'])
 def login():

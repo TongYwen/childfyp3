@@ -21,7 +21,7 @@
 </head>
 <body>
 
-  {% if request.endpoint not in ['login', 'register', 'reset_password', 'forgot'] %}
+  {% if request.endpoint not in ['login', 'register', 'register_select', 'register_parent', 'register_admin', 'reset_password', 'forgot'] %}
     <!-- Navbar (hidden on login page) -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-gradient">
       <div class="container">

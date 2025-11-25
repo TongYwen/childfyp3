@@ -25,9 +25,10 @@
           {% endif %}
         {% endwith %}
 
-        <form method="POST" novalidate>
+        <form method="POST" novalidate id="registerForm">
           <div class="mb-3">
-            <input type="text" class="form-control" name="name" placeholder="Name" required>
+            <input type="text" class="form-control" name="name" id="nameInput" placeholder="Name" pattern="[A-Za-z\s]+" title="Name must contain only alphabetic letters" required>
+            <div class="invalid-feedback" id="nameError">Name must contain only alphabetic letters</div>
           </div>
           <div class="mb-3">
             <input type="email" class="form-control" name="email" placeholder="Email" required>
@@ -63,6 +64,9 @@
   document.addEventListener('DOMContentLoaded', () => {
     const roleSelect = document.querySelector("select[name='role']");
     const passkeyGroup = document.getElementById('admin-passkey-group');
+    const nameInput = document.getElementById('nameInput');
+    const registerForm = document.getElementById('registerForm');
+    const nameError = document.getElementById('nameError');
 
     function toggleAdminPasskeyVisibility() {
       if (!roleSelect || !passkeyGroup) return;
@@ -75,6 +79,36 @@
         if (!isAdmin) passkeyInput.value = '';
       }
     }
+
+    // Validate name input - only alphabetic letters and spaces
+    function validateName() {
+      const nameValue = nameInput.value;
+      const alphabeticPattern = /^[A-Za-z\s]+$/;
+
+      if (nameValue && !alphabeticPattern.test(nameValue)) {
+        nameInput.classList.add('is-invalid');
+        nameInput.classList.remove('is-valid');
+        return false;
+      } else if (nameValue) {
+        nameInput.classList.remove('is-invalid');
+        nameInput.classList.add('is-valid');
+        return true;
+      } else {
+        nameInput.classList.remove('is-invalid', 'is-valid');
+        return false;
+      }
+    }
+
+    // Real-time validation on input
+    nameInput?.addEventListener('input', validateName);
+
+    // Validate on form submission
+    registerForm?.addEventListener('submit', (e) => {
+      if (!validateName()) {
+        e.preventDefault();
+        nameInput.focus();
+      }
+    });
 
     toggleAdminPasskeyVisibility();
     roleSelect?.addEventListener('change', toggleAdminPasskeyVisibility);

@@ -116,6 +116,11 @@ def register():
             flash("Invalid role selected.", "warning")
             return redirect(url_for('register'))
 
+        # Validate name contains only alphabetic letters and spaces
+        if not re.match(r'^[A-Za-z\s]+$', name):
+            flash("Name must contain only alphabetic letters.", "warning")
+            return redirect(url_for('register'))
+
         if not EMAIL_REGEX.match(email):
             flash("Please enter a valid email address.", "warning")
             return redirect(url_for('register'))

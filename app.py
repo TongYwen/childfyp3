@@ -121,6 +121,11 @@ def register_parent():
             flash("Please fill all fields", "warning")
             return redirect(url_for('register_parent'))
 
+        # Validate name contains only letters and spaces
+        if not re.match(r'^[A-Za-z\s]+$', name):
+            flash("Name must contain only alphabet letters.", "warning")
+            return redirect(url_for('register_parent'))
+
         if not EMAIL_REGEX.match(email):
             flash("Please enter a valid email address.", "warning")
             return redirect(url_for('register_parent'))
@@ -160,6 +165,11 @@ def register_admin():
 
         if not all([name, email, password, confirm_password, admin_passkey]):
             flash("Please fill all fields", "warning")
+            return redirect(url_for('register_admin'))
+
+        # Validate name contains only letters and spaces
+        if not re.match(r'^[A-Za-z\s]+$', name):
+            flash("Name must contain only alphabet letters.", "warning")
             return redirect(url_for('register_admin'))
 
         if not EMAIL_REGEX.match(email):
